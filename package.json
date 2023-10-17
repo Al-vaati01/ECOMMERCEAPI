@@ -19,6 +19,7 @@
   "author": "Alvin Vaati",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
@@ -26,6 +27,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^7.6.1",
     "nodemon": "^3.0.1",
-    "redis": "^4.6.10"
+    "redis": "^4.6.10",
+    "uuid": "^9.0.1"
   }
 }
