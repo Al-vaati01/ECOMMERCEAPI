@@ -18,7 +18,6 @@ class DbClient {
                 useNewUrlParser: true,
                 useUnifiedTopology: true,
             });
-
             if (mongoose.connection.readyState === 0) {
                 mongoose.connection.on('error', console.error.bind(console, 'connection error:'))
                 return false;
