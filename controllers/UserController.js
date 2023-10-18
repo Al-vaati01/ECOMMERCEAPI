@@ -1,8 +1,9 @@
 import {User} from '../schema/User.js';
-import dbClient from '../utils/db.js';
+import { Cart } from '../schema/Cart.js';
+import session from 'express-session';
 class UserController {
     // Method to get all users
-    static async getAllUsers(req, res) {
+    static async getAllUsers(_, res) {
         try {
             const users = await User.find();
             res.status(200).json({ success: true, data: users });
@@ -33,6 +34,12 @@ class UserController {
                 email,
                 phoneNumber
             });
+            session.User = {
+                id: newUser._id.toString(),
+                email: newUser.email
+            };
+            session.save();
+            await Cart.create({userId: newUser._id.toString(), items: []});
             res.status(201).json({ success: true, createdAt: newUser.createdAt });
         } catch (error) {
             res.status(500).json({ success: false, error: error });
@@ -93,5 +100,32 @@ class UserController {
             res.status(500).json({ success: false, error: error });
         }
     }
+    static async getCart(req, res) {
+        const userId = req.session.User.id;
+        const cart = await Cart.findOne({userId: userId});
+        res.status(200).json({ success: true, data: cart });
+    }
+    static async updateCart(req, res) {
+        const userId = req.session.User.id;
+        const items = req.params.items;
+        await Cart.updateCart(userId, items);
+        res.status(200).json({ success: true, message: 'Items added to cart successfully'});
+    }
+    static async resetPassword(req, res) {
+        try {
+            const userId = req.session.User.id;
+            const {password} = req.body;
+            const userInDB = await User.findById(userId);
+            if (!userInDB) {
+                res.status(404).json({ success: false, error: 'Password not updated' });
+                return;
+            }
+            userInDB.password = password;
+            await userInDB.save();
+            res.status(200).json({ success: true, message: 'Password updated successfully'});
+        } catch (error) {
+            res.status(500).json({ success: false, error: error });
+        }
+    }
 }
-export default new UserController();
+export default UserController;
