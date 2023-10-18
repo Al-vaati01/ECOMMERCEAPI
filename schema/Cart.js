@@ -1,5 +1,5 @@
-import redisClient from '../utils/redis';
-import dbClient from '../utils/db';
+import redisClient from '../utils/redis.js';
+import dbClient from '../utils/db.js';
 import { ObjectId } from 'mongodb';
 
 const cart = new dbClient.con.Schema({
@@ -48,6 +48,14 @@ class Cart {
                 await dbClient.con.model('carts', cart).updateOne({ userId: ObjectId(userId)}, { items: JSON.parse(existingCart) });
             }
             await redisClient.del(`cart_${userId}`);
+        }catch(err){
+            console.error(err);
+        }
+    }
+    static async updateCart(userId, items) {
+        try{
+            await dbClient.con.model('carts', cart).updateOne({ userId: ObjectId(userId)}, { items: items });
+            await redisClient.set(`cart_${userId}`, JSON.stringify(items), 3600);
         }catch(err){
             console.error(err);
         }
