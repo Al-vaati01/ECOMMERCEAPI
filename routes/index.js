@@ -1,5 +1,5 @@
 import express from 'express';
-import user from './user.js';
+import user from './users.js';
 import admin from './admin.js';
 import product from './product.js';
 

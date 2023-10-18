@@ -1,9 +1,10 @@
-const express = require('express');
+import express from 'express';
+
 const router = express.Router();
 
 // Import the product controller
-const productController = require('../controllers/product');
-const e = require('express');
+import productController from '../controllers/ProductController.js';
+
 
 // Define the product routes
 router.get('/', productController.getAllProducts);

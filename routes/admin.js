@@ -1,26 +1,15 @@
 import express from 'express';
+import AdminController from '../controllers/AdminController.js';
+import { requireSignin, isAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// Import your admin controllers
-import {
-    createProduct,
-    updateProduct,
-    deleteProduct,
-    getAllOrders,
-    getOrderById,
-    updateOrderStatus
-} from '../controllers/admin';
-
-// Import your middleware
-const { requireSignin, isAdmin } = require('../middlewares/auth');
-
 // Admin routes
-router.post('/product/create', requireSignin, isAdmin, createProduct);
-router.put('/product/:productId', requireSignin, isAdmin, updateProduct);
-router.delete('/product/:productId', requireSignin, isAdmin, deleteProduct);
-router.get('/orders', requireSignin, isAdmin, getAllOrders);
-router.get('/order/:orderId', requireSignin, isAdmin, getOrderById);
-router.put('/order/:orderId/status', requireSignin, isAdmin, updateOrderStatus);
+router.post('/product/create', requireSignin, isAdmin, AdminController.createProduct);
+router.put('/product/:productId', requireSignin, isAdmin, AdminController.updateProduct);
+router.delete('/product/:productId', requireSignin, isAdmin, AdminController.deleteProduct);
+router.get('/orders', requireSignin, isAdmin, AdminController.getAllOrders);
+router.get('/order/:orderId', requireSignin, isAdmin, AdminController.getOrderById);
+router.put('/order/:orderId/status', requireSignin, isAdmin, AdminController.updateOrderStatus);
 
 export default router;
