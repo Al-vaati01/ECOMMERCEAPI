@@ -17,7 +17,7 @@ class Cart {
     }
     static async onLoggin(userId) {
         try {
-            const existingCart = await dbClient.con.model('carts', cart).findOne({ userId: ObjectId(userId) });
+            const existingCart = await dbClient.con.model('users').findOne({ userId: ObjectId(userId) });
             if (existingCart) {
                 if(existingCart.items.length > 0){
                     redisClient.set(`cart_${userId}`, JSON.stringify(existingCart.items), 3600);
