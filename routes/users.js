@@ -1,28 +1,15 @@
 import express from 'express';
 import UserController from '../controllers/UserController.js';
+import AuthController from '../controllers/AuthController.js';
+import Auth from '../middleware/auth.js';
 
 const router = express.Router();
 
 // Define user routes
-router.post('/signup', UserController.signup);
-router.get('/', (req, res) => {
-    res.send('user home');
-});
-
-router.get('/:id', (req, res) => {
-    res.send(`Get user with id ${req.params.id}`);
-});
-
-router.post('/', (req, res) => {
-    res.send('Create a new user');
-});
-
-router.put('/:id', (req, res) => {
-    res.send(`Update user with id ${req.params.id}`);
-});
-
-router.delete('/:id', (req, res) => {
-    res.send(`Delete user with id ${req.params.id}`);
-});
-
+router.post('/signup', UserController.createUser);
+router.post('/login', AuthController.connect);
+router.get('/logout',Auth.isUser, AuthController.disconnect);
+router.get('/cart',Auth.isUser, UserController.getCart);
+router.put('/cart:items',Auth.isUser, UserController.updateCart);
+router.put('/reset', Auth.isUser, UserController.resetPassword);
 export default router;
