@@ -22,7 +22,8 @@ const user = new dbClient.con.Schema({
         required: true
     },
     phoneNumber: {
-        type: String
+        type: String,
+        required: true
     },
     createdAt:{
         type: Date,
