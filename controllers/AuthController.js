@@ -1,4 +1,4 @@
-import { User } from '../schema/User';
+import { User } from '../schema/User.js';
 import bcrypt from 'bcrypt';
 
 class AuthController {
@@ -34,6 +34,8 @@ class AuthController {
     static async disconnect(req, res) {
         try {
                 if (req.session.User) {
+                    const userId = req.session.User.id;
+                    await Cart.onExit(userId);
                     await req.session.destroy();
                     res.status(204).json({ status: 'Logged out' });
                 }
