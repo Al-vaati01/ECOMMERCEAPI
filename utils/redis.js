@@ -6,12 +6,16 @@ class RedisClient {
   constructor() {
     try {
       this.client = redis.createClient();
+      this.connectRedis();
       this.client.on('connect',()=>{
         console.log('redis is live');
       });
     } catch (error) {
-      console.error(error);
+      console.error('REDIS ERROR:', error);
     }
+  }
+  async connectRedis() {
+    await this.client.connect();
   }
   async get(key) {
     const value = await promisify(this.client.get).bind(this.client)(key);
