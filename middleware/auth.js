@@ -1,34 +1,51 @@
-import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
 
-const config = {
-    jwtSecret: '$2b$08$VmIxTo1nkf4tFtPFMy7KtOWQh2ks6KJzvejWt2W4cbLWuHbExdFu2'
-};
+dotenv.config();
 
-function auth(req, res, next) {
-    // Get the token from the request header
-    const token = req.header('x-auth-token');
-
-    // Check if token exists
-    if (!token) {
-        return res.status(401).json({ msg: 'No token, authorization denied' });
-    }
-
-    try {
-        // Verify token
-        const decoded = jwt.verify(token, config.jwtSecret);
-
-        // Add user from payload to request object
-        req.user = decoded.user;
-
-        // Check if user has admin role
-        if (req.user.role !== 'admin') {
-            return res.status(401).json({ msg: 'User not authorized' });
+class Auth {
+    //check is user session is active
+    static isUser(req, res, next) {
+        if (req.session.user) {
+            //check if user has id
+            if (req.session.user.id) next();
+            res.status(401).json({ status: 'error', message: 'Unauthorized' });
+        } else {
+            res.status(401).json({ status: 'error', message: 'Unauthorized' });
         }
-
-        next();
-    } catch (err) {
-        res.status(401).json({ msg: 'Token is not valid' });
+    }
+    //check if user is admin
+    static isAdmin(req, res, next) {
+        if (req.session.user && req.session.user.isAdmin === true) {
+            next();
+        } else {
+            res.status(401).json({ status: 'error', message: 'Unauthorized' });
+        }
     }
 }
+export default Auth;
 
-module.exports = auth;
+// import jwt from 'jsonwebtoken';
+// import dotenv from 'dotenv';
+
+// dotenv.config();
+
+// class Auth {
+//     constructor() {
+//         this.secret = process.env.JWT_SECRET;
+//     }
+
+//     generateToken(payload) {
+//         const token = jwt.sign(payload, this.secret, {expiresIn: '1h'});
+//         return token;
+//     }
+
+//     verifyToken(token) {
+//         try {
+//             const decoded = jwt.verify(token, this.secret);
+//             return decoded;
+//         } catch (error) {
+//             return false;
+//         }
+//     }
+// }
+// export default Auth;
