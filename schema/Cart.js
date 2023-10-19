@@ -47,9 +47,9 @@ class Cart {
         try{
             const existingCart = await redisClient.get(`cart_${userId}`);
             if(existingCart){
-                await dbClient.con.model('carts', cart).updateOne({ userId: new Types.ObjectId(userId)}, { items: JSON.parse(existingCart) });
+                await dbClient.con.model('carts').updateOne({ userId: new Types.ObjectId(userId)}, { items: JSON.parse(existingCart) });
             }
-            await redisClient.del(`cart_${userId}`);
+            redisClient.del(`cart_${userId}`);
             return;
         }catch(err){
             console.error(err);
