@@ -1,4 +1,5 @@
 import dbClient from '../utils/db.js';
+import { Types } from 'mongoose';
 
 const user = new dbClient.con.Schema({
     username: {
@@ -37,7 +38,7 @@ const user = new dbClient.con.Schema({
 
 const accessTokens = new dbClient.con.Schema({
     userId: {
-        type: String,
+        type: Types.ObjectId,
         required: true
     },
     token: {
