@@ -54,7 +54,7 @@ class UserController {
             const userId = newUser._id.toString();
             const id = uuidv4().toString();
 
-            const token = await Auth.generateToken({ id: id, email: newUser.email });
+            const token = Auth.generateToken({ id: id, email: newUser.email });
             redisClient.set(`auth_${userId}`, token, 86400);
             Cart.onCreation(userId);
             console.log('Cart created');
