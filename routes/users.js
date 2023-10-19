@@ -13,12 +13,12 @@ const limiter = rateLimit({
 // Define user routes
 router.post('/signup', UserController.createUser);
 router.post('/login',limiter, Auth.verifyToken,AuthController.connect);
-router.get('/logout',Auth, AuthController.disconnect);
-router.get('/cart',Auth, UserController.getCart);
-router.put('/cart:items',Auth, UserController.updateCart);
-router.put('/reset', Auth, UserController.resetPassword);
-router.put('/update', Auth, UserController.updateUserById);
-router.delete('/delete', Auth, UserController.deleteAccount);
+router.post('/logout',Auth.verifyToken, AuthController.disconnect);
+router.get('/cart',Auth.verifyToken, UserController.getCart);
+router.put('/cart:items',Auth.verifyToken, UserController.updateCart);
+router.put('/reset', Auth.verifyToken, UserController.resetPassword);
+router.put('/update', Auth.verifyToken, UserController.updateUserById);
+router.delete('/delete', Auth.verifyToken, UserController.deleteAccount);
 
 router.get('/me', Auth, (req, res) => {
 
