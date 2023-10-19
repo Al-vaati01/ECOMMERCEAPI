@@ -1,6 +1,7 @@
-import jwt from 'jsonwebtoken';
+import jwt, { decode } from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import { AccessToken } from '../schema/User.js';
+import { User } from '../schema/User.js';
 
 dotenv.config();
 const secret = process.env.JWT_SECRET;
@@ -26,7 +27,7 @@ class Auth {
                         });
                     }
                     //set user data in req.userData
-                    req.body.id = { id: id};
+                    req.body.id = { id: id };
                     next();
                 }
                 next();
@@ -35,11 +36,18 @@ class Auth {
             const decoded = jwt.verify(token, secret);
             //check if token is expired
             if (decoded.exp < Date.now().valueOf() / 1000) {
-                AccessToken.create({ tokenId: decoded.id  });
-                return res.status(401).json({
-                    status: 'error',
-                    message: 'Token expired'
-                });
+                try {
+                    const user = User.findOne({ email: decoded.email })
+                    const userId = user._id;
+                    const id = decoded.id;
+                    AccessToken.create({ userId: userId, token: id });
+                    return res.status(401).json({
+                        status: 'error',
+                        message: 'Token expired'
+                    });
+                } catch (err) {
+                    return res.status(500).json({ error: err })
+                }
             }
             //set user data in req.userData
             req.body.decoded = decoded;
