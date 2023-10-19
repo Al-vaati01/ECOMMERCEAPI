@@ -4,6 +4,9 @@ import Auth from '../middleware/auth.js';
 import { v4 as uuidv4 } from 'uuid';
 import { AccessToken } from '../schema/User.js';
 import redisClient from '../utils/redis.js';
+import { Cart } from '../schema/Cart.js';
+import { Types } from 'mongoose';
+
 
 class AuthController {
     static hashPassword(password) {
@@ -62,7 +65,7 @@ class AuthController {
             const existingToken = await redisClient.get(`auth_${userId}`);
             if (existingToken) {
                 //check if id is in expired token list
-                const expiredToken = await AccessToken.findOne({ tokenId: tokkenId });
+                const expiredToken = await AccessToken.findOne({ userId: userId });
                 if (expiredToken) {
                     redisClient.del(`auth_${userId}`);
                     req.session.destroy();
@@ -115,20 +118,23 @@ class AuthController {
     static async disconnect(req, res) {
         try {
             if (req.body.decoded) {
-                const userId = req.body.decoded.id;
-                await Cart.onExit(userId);
-                AccessToken.create({ tokenId: decoded.id  });
-                await redisClient.del(`auth_${userId}`);
-                res.status(204).json({ status: 'Logged out' });
-                return;
+                const id = req.body.decoded.id;
+                const email = req.body.decoded.email;
+                const user = await User.findOne({ email: email });
+                const userId = new Types.ObjectId(user._id);
+                await Cart.onExit(userId.toString());
+                const t = AccessToken.create({ userId :userId, token: id });
+                redisClient.del(`auth_${userId}`);
+                req.session.destroy();
+                return res.status(204).json({ status: 'Logged out', t});
             }
             if (req.session.User) {
-                const userId = req.session.User.id;
+                const userId = new Types.ObjectId(req.session.User.id);
                 await Cart.onExit(userId);
                 await req.session.destroy();
-                res.status(204).json({ status: 'Logged out' });
+                return res.status(204).json({ status: 'Logged out' });
             }
-            res.status(401).json({ error: 'Unauthorized' });
+            return res.status(401).json({ error: 'Unauthorized' });
         } catch (err) {
             console.log(err);
             res.status(500).json({ error: 'Internal Server Error' });
