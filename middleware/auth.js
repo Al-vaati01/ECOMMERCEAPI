@@ -1,51 +1,57 @@
+import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import { AccessToken } from '../schema/User.js';
 
 dotenv.config();
-
+const secret = process.env.JWT_SECRET;
 class Auth {
-    //check is user session is active
-    static isUser(req, res, next) {
-        if (req.session.user) {
-            //check if user has id
-            if (req.session.user.id) next();
-            res.status(401).json({ status: 'error', message: 'Unauthorized' });
-        } else {
-            res.status(401).json({ status: 'error', message: 'Unauthorized' });
-        }
+    static generateToken(payload) {
+        const token = jwt.sign(payload, secret, { expiresIn: '24h' });
+        return token;
     }
-    //check if user is admin
-    static isAdmin(req, res, next) {
-        if (req.session.user && req.session.user.isAdmin === true) {
+
+    static verifyToken(req, res, next) {
+        try {
+            // Get token from header and check if it exists, if not get userdata from body,
+            //if not get userdata from session cookie
+            const token = req.headers.authorization.split(' ')[1];
+            if (!token) {
+                const { email, password } = req.body;
+                if (!email || !password) {
+                    const { id } = req.session.User;
+                    if (!id) {
+                        return res.status(401).json({
+                            status: 'error',
+                            message: 'Unauthorized'
+                        });
+                    }
+                    //set user data in req.userData
+                    req.body.id = { id: id};
+                    next();
+                }
+                next();
+            }
+            //verify token
+            const decoded = jwt.verify(token, secret);
+            //check if token is expired
+            if (decoded.exp < Date.now().valueOf() / 1000) {
+                AccessToken.create({ tokenId: decoded.id  });
+                return res.status(401).json({
+                    status: 'error',
+                    message: 'Token expired'
+                });
+            }
+            //set user data in req.userData
+            req.body.decoded = decoded;
+            req.body.token = token;
             next();
-        } else {
-            res.status(401).json({ status: 'error', message: 'Unauthorized' });
+        } catch (error) {
+            console.log(error);
+            return res.status(401).json({
+                status: 'error',
+                message: 'Invalid token'
+            });
         }
     }
 }
 export default Auth;
-
-// import jwt from 'jsonwebtoken';
-// import dotenv from 'dotenv';
-
-// dotenv.config();
-
-// class Auth {
-//     constructor() {
-//         this.secret = process.env.JWT_SECRET;
-//     }
-
-//     generateToken(payload) {
-//         const token = jwt.sign(payload, this.secret, {expiresIn: '1h'});
-//         return token;
-//     }
-
-//     verifyToken(token) {
-//         try {
-//             const decoded = jwt.verify(token, this.secret);
-//             return decoded;
-//         } catch (error) {
-//             return false;
-//         }
-//     }
-// }
-// export default Auth;
