@@ -30,7 +30,7 @@ const sessionConfig = session({
     resave: false,
     saveUninitialized: true,
     cookie: {
-        secure: false,
+        secure: true,
         httpOnly: true,
         maxAge: 86400,
     },
