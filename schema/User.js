@@ -82,7 +82,8 @@ const admin = new dbClient.con.Schema({
     },
     isAdmin: {
         type: Boolean,
-        required: true
+        required: true,
+        default: true
     }
 });
 
