@@ -19,9 +19,6 @@ router.put('/cart:items',Auth.verifyToken, UserController.updateCart);
 router.put('/reset', Auth.verifyToken, UserController.resetPassword);
 router.put('/update', Auth.verifyToken, UserController.updateUserById);
 router.delete('/delete', Auth.verifyToken, UserController.deleteAccount);
+router.get('/profile', Auth.verifyToken, UserController.getUserById);
 
-router.get('/me', Auth, (req, res) => {
-
-    res.status(200).json({ success: true, data: req.session.User });
-});
 export default router;
