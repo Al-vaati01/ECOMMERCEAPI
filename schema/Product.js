@@ -2,7 +2,7 @@ import dbClient from '../utils/db.js';
 
 const product = new dbClient.con.Schema(
     {
-        name: {
+        productname: {
             type: String,
             required: true
         },
@@ -95,10 +95,17 @@ const product = new dbClient.con.Schema(
             default: Date.now()
         },
         updatedAt: {
-            type: Date.now()
+            type: Date,
+            default: Date.now()
         }
     }
 );
 const Product = dbClient.con.model('products', product);
+Product.createIndexes();
+Product.on('index', function (err) {
+    if (err) {
+        console.error(err);
+    }
+});
 
 export default Product;
