@@ -45,6 +45,9 @@ class Cart {
     }
     static async onExit(userId) {
         try{
+            if(!userId){
+                return;
+            }
             const existingCart = await redisClient.get(`cart_${userId}`);
             if(existingCart){
                 await dbClient.con.model('carts').updateOne({ userId: new Types.ObjectId(userId)}, { items: JSON.parse(existingCart) });
@@ -64,15 +67,16 @@ class Cart {
         }
     }
 }
-const CartModel = dbClient.con.model('carts', cart);
-CartModel.on('index', function (err) {
-    if (err) console.error(err);
-});
+
 cart.post('save', async function (doc) {
     try {
         Cart.onCreation(new Types.ObjectId(doc.userId));
     } catch (err) {
         console.error(err);
     }
+});
+const CartModel = dbClient.con.model('carts', cart);
+CartModel.on('index', function (err) {
+    if (err) console.error(err);
 });
 export { CartModel, Cart };
