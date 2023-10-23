@@ -101,7 +101,7 @@ const product = new dbClient.con.Schema(
     }
 );
 const Product = dbClient.con.model('products', product);
-Product.createIndexes();
+Product.createIndexes({productname: 'text', brand: 'text', category: 'text'});
 Product.on('index', function (err) {
     if (err) {
         console.error(err);

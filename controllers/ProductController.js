@@ -1,4 +1,5 @@
 import Product from '../schema/Product.js';
+import FilesController from './FileController.js';
 class ProductController {
     static async createProduct(req, res) {
         try {
@@ -42,7 +43,7 @@ class ProductController {
                     message: 'Product already exists'
                 });
             };
-            const product = await Product.create({
+            const product = new Product({
                 productname,
                 description,
                 sku,
@@ -69,7 +70,14 @@ class ProductController {
                 relatedProducts,
                 reviews
             });
+            if (images) {
+                const files = await FilesController.saveFile(req, res);
+                product.images = files;
+            }
+            await product.save();
             const id = product._id.toString();
+            req.body.productId = id;
+            await FilesController.saveFile(req, res);
             const name = product.productname;
             return res.status(201).json({
                 status: 'success',
@@ -105,6 +113,32 @@ class ProductController {
             }
             return res.status(200).json({ success: true, message: `${product.productname} deleted successfully` });
 
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ success: false, error: 'server error' });
+        }
+    }
+    static async getAllProducts(req, res) {
+        try {
+            const page = parseInt(req.query.page) || 1;
+            const limit = 20;
+
+            const products = await Product.find({}, {__v: 0 }).limit(limit).skip((page - 1) * limit);
+            const results = {};
+            if (products.length < limit) {
+                results.next = null;
+            } else {
+                results.next = {
+                    page: page + 1,
+                };
+            }
+            if (page > 1) {
+                results.previous = {
+                    page: page - 1,
+                };
+            }
+            results.results = products;
+            res.status(200).json({ success: true, data: results });
         } catch (error) {
             console.error(error);
             res.status(500).json({ success: false, error: 'server error' });

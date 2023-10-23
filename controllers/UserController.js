@@ -196,13 +196,20 @@ class UserController {
     static async getCart(req, res) {
         const userId = req.session.User.id || req.body.id || await AuthController.getUserByfromToken(req, res) || null;
         const cart = await Cart.findOne({ userId: userId });
-        res.status(200).json({ success: true, data: cart });
+        res.status(200).json({ cart });
     }
     static async updateCart(req, res) {
         const userId = req.session.User.id || req.body.id || await AuthController.getUserByfromToken(req, res) || null;
         const items = req.params.items;
         await Cart.updateCart(userId, items);
-        res.status(200).json({ success: true, message: 'Items added to cart successfully' });
+        //calculate total price and quantity
+        let total = 0;
+        let quantity = 0;
+        for (const item of items) {
+            total += item.price * item.quantity;
+            quantity += item.quantity;
+        }
+        res.status(200).json({ success: true, data: { total: total, quantity: quantity } });
     }
     static async resetPassword(req, res) {
         try {
