@@ -194,23 +194,40 @@ class UserController {
         }
     }
     static async getCart(req, res) {
-        const userId = req.session.User.id || req.body.id || await AuthController.getUserByfromToken(req, res) || null;
-        const cart = await Cart.findOne({ userId: userId });
+        const userId =
+            req.session?.User?.id ??
+            req.body?.id ??
+            (await AuthController.getUserByfromToken(req, res)) ??
+            null;
+
+        const cart = await CartModel.findOne({ userId: userId });
         res.status(200).json({ cart });
     }
     static async updateCart(req, res) {
-        const userId = req.session.User.id || req.body.id || await AuthController.getUserByfromToken(req, res) || null;
-        const items = req.params.items;
-        await Cart.updateCart(userId, items);
-        //calculate total price and quantity
-        let total = 0;
-        let quantity = 0;
-        for (const item of items) {
-            total += item.price * item.quantity;
-            quantity += item.quantity;
+        const userId =
+            req.session?.User?.id ??
+            req.body?.id ??
+            (await AuthController.getUserByfromToken(req, res)) ??
+            null;
+        const items = req.body.items;
+
+        if (userId) {
+            Cart.updateCart(userId, items);
+
+            let total = 0;
+            let quantity = 0;
+
+            for (const item of items) {
+                total += item.price;
+                quantity += 1;
+            }
+
+            res.status(200).json({ success: true, data: { total: total, quantity: quantity } });
+        } else {
+            res.status(400).json({ success: false, message: "User ID not found." });
         }
-        res.status(200).json({ success: true, data: { total: total, quantity: quantity } });
     }
+
     static async resetPassword(req, res) {
         try {
             const userId = req.session.User.id || req.body.id || await AuthController.getUserByfromToken(req, res) || null;

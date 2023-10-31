@@ -24,16 +24,18 @@ class AuthController {
             const hashedpassword = AuthController.hashPassword(password);
 
             // Check if the user exists in the database
-            let userInDB;
+            let userInDB = null;
             if (req.body.role) {
-                if (req.body.role = 'admin') {
+                if (req.body.role === 'admin') {
                     userInDB = await Admin.findOne({ email: email });
+                }else{
+                    res.status(403).json({ success: false, message: 'Forbidden' });
                 }
-                res.status(403).json({ success: false, message: 'Forbidden' });
+            } else {
+                userInDB = await User.findOne({ email: email });
             }
-            userInDB = await User.findOne({ email: email });
 
-            if (!userInDB) {
+            if (userInDB === null) {
                 res.status(401).json({ error: 'Unauthorized' });
             } else if (bcrypt.compare(hashedpassword.toString(), userInDB.password.toString())) {
                 const userId = userInDB._id.toString();
@@ -178,26 +180,22 @@ class AuthController {
     static async getAdminByfromToken(req, res) {
         const tokenId = req.body.decoded ? req.body.decoded.id : null;
         if (!tokenId) {
-            res.status(401).json({ error: 'Unauthorized' });
-            return;
+            return null;
         }
         //get user id using email
         const email = req.body.decoded.email;
         if (!email) {
-            res.status(401).json({ error: 'Unauthorized' });
-            return;
+            return null;
         }
         const admin = await Admin.findOne({ email: email }, { password: 0, __v: 0 });
         if (!admin) {
-            res.status(404).json({ error: 'Unauthorized' });
-            return;
+            return  null;
         }
         const adminId = admin._id.toString();
         //check if token is in redis
         const token = await redisClient.get(`auth_${adminId}`);
         if (!token) {
-            res.status(401).json({ error: 'Unauthorized' });
-            return;
+            return null;
         }
         return adminId;
     }

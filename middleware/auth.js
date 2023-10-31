@@ -14,36 +14,58 @@ class Auth {
     }
     static async isAdmin(req, res, next) {
         try {
-            const adminsessId = req.body.id;
-            const user = await Admin.findById(adminsessId);
-            if (user) {
-                if (user.role !== 'admin') {
+            if (req.body.id || req.body.decoded || req.body.token) {
+                const adminsessId = req.body.id;
+                const user = await Admin.findById(adminsessId);
+                if (user) {
+                    if (user.role !== 'admin') {
+                        return res.status(403).json({
+                            status: 'error',
+                            message: 'Forbidden'
+                        });
+                    }
+                    req.body.role = 'admin';
+                    next();
+                }
+                const adminId = await AuthController.getAdminByfromToken(req, res);
+                const admin = await Admin.findById(adminId);
+                if (!admin) {
+                    res.status(403).json({
+                        status: 'error',
+                        message: 'Forbidden'
+                    });
+                }
+                if (req.body.decoded.role !== 'admin') {
                     return res.status(403).json({
                         status: 'error',
                         message: 'Forbidden'
                     });
                 }
-                return next();
+                next();
             }
-            const adminId =  await AuthController.getAdminByfromToken(req, res);
-            const admin = await Admin.findById(adminId);
-            if (!admin) {
-                return res.status(403).json({
-                    status: 'error',
-                    message: 'Forbidden'
-                });
+            if (req.body.email && req.body.password) {
+                const email = req.body.email;
+
+                const user = await Admin.findOne({ email: email });
+                if (!user) {
+                    return res.status(403).json({
+                        status: 'error',
+                        message: 'Forbidden'
+                    });
+                }
+                if (user.isAdmin !== true) {
+                    return res.status(403).json({
+                        status: 'error',
+                        message: 'Forbidden'
+                    });
+                }
+                req.body.role = 'admin';
+                next();
             }
-            if (req.body.decoded.role !== 'admin') {
-                return res.status(403).json({
-                    status: 'error',
-                    message: 'Forbidden'
-                });
-            }
-            return next();
 
         } catch (error) {
             console.error(error);
-            return res.status(500).json({
+            res.status(500).json({
                 status: 'error',
                 message: 'Server error'
             });

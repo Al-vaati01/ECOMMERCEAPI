@@ -15,7 +15,7 @@ router.post('/signup', UserController.createUser);
 router.post('/login',limiter, Auth.verifyToken,AuthController.connect);
 router.post('/logout',Auth.verifyToken, AuthController.disconnect);
 router.get('/cart',Auth.verifyToken, UserController.getCart);
-router.put('/cart:items',Auth.verifyToken, UserController.updateCart);
+router.put('/cart',Auth.verifyToken, UserController.updateCart);
 router.put('/reset', Auth.verifyToken, UserController.resetPassword);
 router.put('/update', Auth.verifyToken, UserController.updateUserById);
 router.delete('/delete', Auth.verifyToken, UserController.deleteAccount);

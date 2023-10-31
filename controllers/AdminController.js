@@ -1,6 +1,9 @@
 import { Admin, User } from "../schema/User.js";
 import AuthController from "./AuthController.js";
 import UserController from "./UserController.js";
+import { v4 as uuidv4 } from 'uuid';
+import Auth from "../middleware/auth.js";
+import redisClient from "../utils/redis.js";
 
 class AdminController {
     static async createUser(req, res) {

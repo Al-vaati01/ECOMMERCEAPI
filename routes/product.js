@@ -8,7 +8,7 @@ import Auth from '../middleware/auth.js';
 
 
 // Define the product routes
-router.post('/create', productController.createProduct);
+router.post('/create', Auth.verifyToken, Auth.isAdmin,productController.createProduct);
 router.put('/:productId', Auth.verifyToken, Auth.isAdmin, productController.updateProduct);
 router.delete('/:productId',Auth.verifyToken,Auth.isAdmin, productController.deleteProduct);
 router.get('/', productController.getAllProducts);
