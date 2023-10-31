@@ -17,19 +17,16 @@ class AdminController {
                 phoneNumber
             } = req.body;
             if (!username || !email || !password || !firstName || !lastName || !phoneNumber) {
-                res.status(400).json({ success: false, error: 'Missing required fields' });
-                return;
+                return res.status(400).json({ success: false, error: 'Missing required fields' });
             }
             // Check if email or username already exists in database
             const emailExist = await Admin.find({ email: email });
             const userNameExist = await Admin.find({ username: username });
             if (emailExist.length > 0) {
-                res.status(400).json({ success: false, error: 'Email already exists' });
-                return;
+                return res.status(400).json({ success: false, error: 'Email already exists' });
             }
             if (userNameExist.length > 0) {
-                res.status(400).json({ success: false, error: 'Username already exists' });
-                return;
+                return res.status(400).json({ success: false, error: 'Username already exists' });
             }
             const hashedPassword = await AuthController.hashPassword(password);
             const newAdmin = new Admin({
@@ -47,11 +44,11 @@ class AdminController {
 
             const token = Auth.generateToken({ id: id, email: newAdmin.email ,role: 'admin'});
             redisClient.set(`auth_${adminId}`, token, 86400);
-            res.status(201).json({ success: true, createdAt: newAdmin.createdAt, token: token });
+            return res.status(201).json({ success: true, createdAt: newAdmin.createdAt, token: token });
 
         } catch (err) {
             console.error(err);
-            res.status(500).json({ success: false, message: 'server error' });
+            return res.status(500).json({ success: false, message: 'server error' });
         }
     }
     static async getAllUsers(req, res) {
@@ -63,14 +60,13 @@ class AdminController {
         //delete user from db
         const user = await User.findByIdAndDelete(userId);
         if (!user) {
-            res.status(404).json({ success: false, message: 'User not found' });
-            return;
+            return res.status(404).json({ success: false, message: 'User not found' });
         }
         //delete user from redis
         redisClient.del(`auth_${userId}`);
         //delete user cart from redis
         redisClient.del(`cart_${userId}`);
-        res.status(200).json({ success: true, message: 'User deleted successfully' });
+        return res.status(200).json({ success: true, message: 'User deleted successfully' });
     }
     static async getUser(){
         const userId = req.params.id;

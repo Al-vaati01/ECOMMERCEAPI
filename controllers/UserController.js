@@ -27,11 +27,11 @@ class UserController {
                     page: page - 1,
                 };
             }
-            results.results = users;
-            res.status(200).json({ success: true, data: results });
+            results.users = users;
+            return res.status(200).json({ success: true, data: results });
         } catch (error) {
             console.log(error);
-            res.status(500).json({ success: false, message: 'error' });
+            return res.status(500).json({ success: false, message: 'error' });
         }
     }
     // Method to create a new user
@@ -46,19 +46,16 @@ class UserController {
                 phoneNumber
             } = req.body;
             if (!username || !email || !password || !firstName || !lastName || !phoneNumber) {
-                res.status(400).json({ success: false, error: 'Missing required fields' });
-                return;
+                return res.status(400).json({ success: false, error: 'Missing required fields' });
             }
             // Check if email or username already exists in database
             const emailexist = await User.find({ email: email });
             const usernameexist = await User.find({ username: username });
             if (emailexist.length > 0) {
-                res.status(400).json({ success: false, error: 'Email already exists' });
-                return;
+                return res.status(400).json({ success: false, error: 'Email already exists' });
             }
             if (usernameexist.length > 0) {
-                res.status(400).json({ success: false, error: 'Username already exists' });
-                return;
+                return res.status(400).json({ success: false, error: 'Username already exists' });
             }
             const hashedPassword = await AuthController.hashPassword(password);
             const newUser = new User({
@@ -78,11 +75,11 @@ class UserController {
             redisClient.set(`auth_${userId}`, token, 86400);
             Cart.onCreation(userId);
             console.log('Cart created');
-            res.status(201).json({ success: true, createdAt: newUser.createdAt, token: token });
+            return res.status(201).json({ success: true, createdAt: newUser.createdAt, token: token });
 
         } catch (err) {
             console.error(err);
-            res.status(500).json({ success: false, message: 'server error' });
+            return res.status(500).json({ success: false, message: 'server error' });
         }
     }
 
@@ -93,24 +90,20 @@ class UserController {
             if (!userId) {
                 const tokenId = req.body.decoded.id || null;
                 if (!tokenId) {
-                    res.status(401).json({ success: false, error: 'Unauthorized' });
-                    return;
+                    return res.status(401).json({ success: false, error: 'Unauthorized' });
                 }
                 //check if token is in redis
                 const token = await redisClient.get(`auth_${tokenId}`);
                 if (!token) {
-                    res.status(401).json({ success: false, error: 'Unauthorized' });
-                    return;
+                    return res.status(401).json({ success: false, error: 'Unauthorized' });
                 }
                 const email = req.body.decoded.email;
                 if (!email) {
-                    res.status(401).json({ success: false, error: 'Unauthorized' });
-                    return;
+                    return res.status(401).json({ success: false, error: 'Unauthorized' });
                 }
                 const user = await User.findOne({ email: email }, { password: 0, __v: 0 });
                 if (!user) {
-                    res.status(404).json({ success: false, error: 'User not found' });
-                    return;
+                    return res.status(404).json({ success: false, error: 'User not found' });
                 }
 
                 const cart = CartModel.findOne({ userId: user._id });
@@ -119,7 +112,7 @@ class UserController {
                     ...user._doc,
                     cart: cartdata.items
                 };
-                res.status(200).json({ success: true, data: data });
+                return res.status(200).json({ success: true, data: data });
             }
             const user = await User.findById(userId, { password: 0, __v: 0 });
             const cart = await CartModel.findOne({ userId: userId });
@@ -128,10 +121,10 @@ class UserController {
                 ...user._doc,
                 cart: cartdata.items
             };
-            res.status(200).json({ success: true, data: data });
+            return res.status(200).json({ success: true, data: data });
         } catch (error) {
             console.error(error);
-            res.status(500).json({ success: false, error: error });
+            return res.status(500).json({ success: false, error: error });
         }
     }
 
@@ -140,15 +133,13 @@ class UserController {
         try {
             const userId = req.session.User ? req.session.User.id : req.body.id || await AuthController.getUserByfromToken(req, res) || null;
             if (userId === null) {
-                res.status(401).json({ success: false, error: 'Unauthorized' });
-                return;
+                return res.status(401).json({ success: false, error: 'Unauthorized' });
             }
 
             // Check if user exists in database
             const userInDB = await User.findById(userId);
             if (!userInDB) {
-                res.status(404).json({ success: false, error: 'User not found' });
-                return;
+                return res.status(404).json({ success: false, error: 'User not found' });
             }
             // Update user in database
             const { firstName, lastName, phoneNumber, password, email } = req.body;
@@ -168,16 +159,15 @@ class UserController {
             if (email) {
                 const emailExist = await User.find({ email: email });
                 if (emailExist.length > 0) {
-                    res.status(400).json({ success: false, error: 'Email already exists' });
-                    return;
+                    return res.status(400).json({ success: false, error: 'Email already exists' });
                 }
                 userInDB.email = email;
             }
             await userInDB.save();
-            res.status(200).json({ success: true, message: 'User updated successfully' });
+            return res.status(200).json({ success: true, message: 'User updated successfully' });
         } catch (error) {
             console.log(error);
-            res.status(500).json({ success: false, error: error });
+            return res.status(500).json({ success: false, error: error });
         }
     }
 
@@ -188,9 +178,9 @@ class UserController {
             await User.findByIdAndDelete(userId);
 
             // Return success response
-            res.status(200).json({ success: true, message: 'User deleted successfully' });
+            return res.status(200).json({ success: true, message: 'User deleted successfully' });
         } catch (error) {
-            res.status(500).json({ success: false, error: error });
+            return res.status(500).json({ success: false, error: error });
         }
     }
     static async getCart(req, res) {
@@ -201,7 +191,7 @@ class UserController {
             null;
 
         const cart = await CartModel.findOne({ userId: userId });
-        res.status(200).json({ cart });
+        return res.status(200).json({ cart });
     }
     static async updateCart(req, res) {
         const userId =
@@ -222,9 +212,9 @@ class UserController {
                 quantity += 1;
             }
 
-            res.status(200).json({ success: true, data: { total: total, quantity: quantity } });
+            return res.status(200).json({ success: true, data: { total: total, quantity: quantity } });
         } else {
-            res.status(400).json({ success: false, message: "User ID not found." });
+            return res.status(400).json({ success: false, message: "User ID not found." });
         }
     }
 
@@ -234,14 +224,14 @@ class UserController {
             const { password } = req.body;
             const userInDB = await User.findById(userId);
             if (!userInDB) {
-                res.status(404).json({ success: false, error: 'Password not updated' });
+                return res.status(404).json({ success: false, error: 'Password not updated' });
                 return;
             }
             userInDB.password = password;
             await userInDB.save();
-            res.status(200).json({ success: true, message: 'Password updated successfully' });
+            return res.status(200).json({ success: true, message: 'Password updated successfully' });
         } catch (error) {
-            res.status(500).json({ success: false, error: error });
+            return res.status(500).json({ success: false, error: error });
         }
     }
 }

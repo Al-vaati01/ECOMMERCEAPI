@@ -30,7 +30,7 @@ class Auth {
                 const adminId = await AuthController.getAdminByfromToken(req, res);
                 const admin = await Admin.findById(adminId);
                 if (!admin) {
-                    res.status(403).json({
+                    return res.status(403).json({
                         status: 'error',
                         message: 'Forbidden'
                     });
@@ -65,7 +65,7 @@ class Auth {
 
         } catch (error) {
             console.error(error);
-            res.status(500).json({
+            return res.status(500).json({
                 status: 'error',
                 message: 'Server error'
             });

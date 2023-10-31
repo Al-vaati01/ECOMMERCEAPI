@@ -86,7 +86,7 @@ class ProductController {
             });
         } catch (error) {
             console.error(error);
-            res.status(500).json({ success: false, message: 'server error' });
+            return res.status(500).json({ success: false, message: 'server error' });
         }
     }
 
@@ -100,7 +100,7 @@ class ProductController {
             return res.status(200).json({ success: true, data: [product._id, product.productname, {message: 'Product updated successfully'} ]});
         } catch (error) {
             console.error(error);
-            res.status(500).json({ success: false, error: 'server error',message:'Product not updated' });
+            return res.status(500).json({ success: false, error: 'server error',message:'Product not updated' });
         }
     }
 
@@ -115,7 +115,7 @@ class ProductController {
 
         } catch (error) {
             console.error(error);
-            res.status(500).json({ success: false, error: 'server error' });
+            return res.status(500).json({ success: false, error: 'server error' });
         }
     }
     static async getAllProducts(req, res) {
@@ -138,10 +138,10 @@ class ProductController {
                 };
             }
             results.results = products;
-            res.status(200).json({ success: true, data: results });
+            return res.status(200).json({ success: true, data: results });
         } catch (error) {
             console.error(error);
-            res.status(500).json({ success: false, error: 'server error' });
+            return res.status(500).json({ success: false, error: 'server error' });
         }
     }
 

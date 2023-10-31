@@ -29,22 +29,22 @@ class AuthController {
                 if (req.body.role === 'admin') {
                     userInDB = await Admin.findOne({ email: email });
                 }else{
-                    res.status(403).json({ success: false, message: 'Forbidden' });
+                    return res.status(403).json({ success: false, message: 'Forbidden' });
                 }
             } else {
                 userInDB = await User.findOne({ email: email });
             }
 
             if (userInDB === null) {
-                res.status(401).json({ error: 'Unauthorized' });
-            } else if (bcrypt.compare(hashedpassword.toString(), userInDB.password.toString())) {
+                return res.status(403).json({ success: false, message: 'Forbidden' });
+            }
+            if (bcrypt.compare(hashedpassword.toString(), userInDB.password.toString())) {
                 const userId = userInDB._id.toString();
 
                 //check if token exists in redis
                 const existingToken = await redisClient.get(`auth_${userId}`);
                 if (existingToken) {
-                    res.status(200).json({ status: 'Logged in', token: existingToken });
-                    return;
+                    return res.status(200).json({ status: 'Logged in', token: existingToken });
                 }
 
                 const id = uuidv4().toString();
@@ -62,9 +62,9 @@ class AuthController {
                     username: userInDB.username,
                 }
                 req.session.save();
-                res.status(200).json({ status: 'Logged in', token: newToken });
+                return res.status(200).json({ status: 'Logged in', token: newToken });
             } else {
-                res.status(401).json({ error: 'Unauthorized' });
+                return res.status(401).json({ error: 'Unauthorized' });
             }
 
         } else if (req.body.decoded) {
@@ -77,7 +77,7 @@ class AuthController {
                 userInDB = await User.findOne({ email: email });
             }
             if (!userInDB) {
-                res.status(401).json({ error: 'Unauthorized' });
+                return res.status(401).json({ error: 'Unauthorized' });
             }
             const userId = userInDB._id.toString();
 
@@ -89,11 +89,9 @@ class AuthController {
                 if (expiredToken) {
                     redisClient.del(`auth_${userId}`);
                     req.session.destroy();
-                    res.status(401).json({ error: 'Unauthorized' });
-                    return;
+                    return res.status(401).json({ error: 'Unauthorized' });
                 }
-                res.status(200).json({ status: 'Logged in', token: existingToken });
-                return;
+                return res.status(200).json({ status: 'Logged in', token: existingToken });
             }
 
             const id = uuidv4().toString();
@@ -111,7 +109,7 @@ class AuthController {
                 username: userInDB.username,
             }
             req.session.save();
-            res.status(200).json({ status: 'Logged in', token: newToken });
+            return res.status(200).json({ status: 'Logged in', token: newToken });
 
         } else if (req.body.id) {
             const userId = req.body.id;
@@ -119,8 +117,7 @@ class AuthController {
             //check if token exists in redis
             const existingToken = await redisClient.get(`auth_${userId}`);
             if (existingToken) {
-                res.status(200).json({ status: 'Logged in', token: existingToken });
-                return;
+                return res.status(200).json({ status: 'Logged in', token: existingToken });
             }
             let userInDB;
             if (req.body.role && req.body.role === 'admin') {
@@ -130,7 +127,7 @@ class AuthController {
             }
             if (!userInDB) {
                 req.session.destroy();
-                res.status(401).json({ error: 'Unauthorized' });
+                return res.status(401).json({ error: 'Unauthorized' });
             }
             const id = uuidv4().toString();
 
@@ -147,33 +144,29 @@ class AuthController {
                 username: userInDB.username,
             }
             req.session.save();
-            res.status(200).json({ status: 'Logged in', token: newToken });
+            return res.status(200).json({ status: 'Logged in', token: newToken });
         }
     }
     //get user by id using token
     static async getUserByfromToken(req, res) {
         const tokenId = req.body.decoded ? req.body.decoded.id : null;
         if (!tokenId) {
-            res.status(401).json({ error: 'Unauthorized' });
-            return;
+            return res.status(401).json({ error: 'Unauthorized' });
         }
         //get user id using email
         const email = req.body.decoded.email;
         if (!email) {
-            res.status(401).json({ error: 'Unauthorized' });
-            return;
+            return res.status(401).json({ error: 'Unauthorized' });
         }
         const user = await User.findOne({ email: email }, { password: 0, __v: 0 });
         if (!user) {
-            res.status(404).json({ error: 'Unauthorized' });
-            return;
+            return res.status(404).json({ error: 'Unauthorized' });
         }
         const userId = user._id.toString();
         //check if token is in redis
         const token = await redisClient.get(`auth_${userId}`);
         if (!token) {
-            res.status(401).json({ error: 'Unauthorized' });
-            return;
+            return res.status(401).json({ error: 'Unauthorized' });
         }
         return userId;
     }
@@ -226,7 +219,7 @@ class AuthController {
             return res.status(401).json({ error: 'Unauthorized' });
         } catch (err) {
             console.log(err);
-            res.status(500).json({ error: 'Internal Server Error' });
+            return res.status(500).json({ error: 'Internal Server Error' });
         }
     }
 
