@@ -1,32 +1,29 @@
+#!/usr/bin/node
 import { promisify } from 'util';
 import redis from 'redis';
 
 class RedisClient {
   constructor() {
     try {
-      this.client = redis.createClient({
-        host: process.env.REDIS_HOST || 'localhost',
-        port: process.env.REDIS_PORT || 6379,
-        password: process.env.REDIS_PASSWORD,
-        tls: {
-          rejectUnauthorized: false,
-        },
-      });
+      this.client = redis.createClient(
+        {
+          url: `redis://localhost:${process.env.REDIS_PORT || 6318}`,
+        }
+      );
       this.connectRedis();
-      this.client.on('connect', () => {
-        console.log('Redis is live');
+
+      this.client.on('connect',()=>{
+        console.log('redis is live');
       });
     } catch (error) {
       console.error('REDIS ERROR:', error);
     }
   }
-
   async connectRedis() {
-    await promisify(this.client.connect).bind(this.client)();
+    await this.client.connect();
   }
-
   async get(key) {
-    return await promisify(this.client.get).bind(this.client)(key);
+    return await this.client.get.bind(this.client)(key);
   }
 
   async set(key, value, duration) {
@@ -40,7 +37,6 @@ class RedisClient {
   async hset(hashKey, key, value) {
     await promisify(this.client.hSet).bind(this.client)(hashKey, key, value);
   }
-
   async hgetAll(hashKey) {
     const value = await promisify(this.client.hGetAll).bind(this.client)(hashKey);
     return value;
