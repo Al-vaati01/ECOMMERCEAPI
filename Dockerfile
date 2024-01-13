@@ -1,6 +1,9 @@
 # Use an official Node.js runtime as a base image
 FROM --platform=linux/amd64 node:20
 
+# image name
+LABEL Name=store Version=0.0.1
+
 # Set the working directory in the container
 WORKDIR /usr/src/app
 
