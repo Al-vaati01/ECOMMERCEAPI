@@ -27,7 +27,7 @@ ENV DB_USER storeuser
 ENV DB_PASSWORD ''
 
 ENV REDIS_HOST redis
-ENV REDIS_PORT 6379
+ENV REDIS_PORT 6318
 ENV REDIS_PASSWORD ''
 
 # Command to run your application
