@@ -73,9 +73,7 @@ class UserController {
 
             const token = Auth.generateToken({ id: id, email: newUser.email });
 
-            req.session.User['auth'] = false;
-            req.session.User['id'] = userId;
-            req.session.User['username'] = newUser.username;
+            req.session.User = { id: userId, username: newUser.username, auth: false };
             // redisClient.set(`auth_${userId}`, token, 86400);
             Cart.onCreation(userId);
 
