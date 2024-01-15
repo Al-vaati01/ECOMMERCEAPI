@@ -10,13 +10,13 @@ COPY package*.json ./
 # Install app dependencies
 RUN npm install
 
-# Install Redis server
-RUN apt-get update && apt-get install -y redis-server
+# # Install Redis server
+# RUN apt-get update && apt-get install -y redis-server
 
-COPY run.sh /usr/src/app/run.sh
-RUN chmod +x /usr/src/app/run.sh
+# COPY run.sh /usr/src/app/run.sh
+# RUN chmod +x /usr/src/app/run.sh
 
-COPY redis.conf /etc/redis/redis.conf
+# COPY redis.conf /etc/redis/redis.conf
 
 # Copy the rest of the application code
 COPY . .
@@ -31,8 +31,8 @@ ENV DB_DATABASE store
 ENV DB_USER storeuser
 ENV DB_PASSWORD ''
 ENV NODE_ENV production
-ENV REDIS_HOST localhost
-ENV REDIS_PORT 6380
+# ENV REDIS_HOST localhost
+# ENV REDIS_PORT 6380
 
-# Command to run the script
-CMD ["bash", "/usr/src/app/run.sh"]
+# # Command to run the script
+# CMD ["bash", "/usr/src/app/run.sh"]
