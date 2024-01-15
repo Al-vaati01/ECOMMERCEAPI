@@ -1,5 +1,5 @@
 import session from "express-session";
-import redisClient from "../utils/redis.js";
+// import redisClient from "../utils/redis.js";
 // import RedisStore from "connect-redis";
 import dotenv from "dotenv";
 import { v4 as uuidv4 } from "uuid";
