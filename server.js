@@ -1,8 +1,6 @@
 import dotenv from 'dotenv';
 import express from 'express';
 import AppController from './controllers/AppController.js';
-import { once } from 'events';
-
 
 
 // Load environment variables
@@ -11,16 +9,18 @@ dotenv.config();
 const port = process.env.PORT || 3000;
 const app = express();
 
-once(process, 'redisReady')
-    .then(() => {
-        const appController = new AppController(app);
-        appController.initializeMiddlewares();
-        appController.initializeRoutes();
+app.use(express.json());
 
+app.get('/', (req, res) => {
+    res.send({
+        status: 'OK',
+        message: 'Welcome e-com API',
     })
-    .catch(err => {
-        console.error('REDIS ERROR: ', err);
-    });
+});
+
+const appController = new AppController(app);
+appController.initializeMiddlewares();
+appController.initializeRoutes();
 
 app.use((err, req, res, next) => {
     if (err) {

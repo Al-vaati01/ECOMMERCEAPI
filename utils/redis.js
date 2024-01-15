@@ -16,7 +16,6 @@ class RedisClient {
       );
       this.connectRedis();
       this.client.on('connect', () => {
-        process.emit('redisReady');
         console.log('redis is live');
       });
       this.client.on('error', (error) => {
