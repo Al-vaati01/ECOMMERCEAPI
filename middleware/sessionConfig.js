@@ -4,7 +4,6 @@ import session from "express-session";
 import dotenv from "dotenv";
 import { v4 as uuidv4 } from "uuid";
 import MongoDBStore from 'connect-mongodb-session';
-import dbClient from "../utils/db";
 
 dotenv.config();
 const secret_session = process.env.SESSION_SECRET;
@@ -21,8 +20,13 @@ if (!secret_session) {
 //     ttl: 86400,
 //     prefix: "session:",
 // });
+
+const host = 'db' || process.env.DB_HOST || 'localhost';
+const port = process.env.DB_PORT || 27018;
+const database = 'ecomsessions';
+
 const MongoDBStoreOptions = {
-    uri: dbClient.url,
+    uri: `mongodb://${host}:${port}/${database}`,
     collection: 'sessions',
 };
 
