@@ -1,5 +1,7 @@
 #!/bin/bash
 
+msg='Script executed at: '
+msg+=$(date)
 #start the redis server
 redis-server --daemonize yes
-echo 'Script executed at $(date)' >> /usr/src/app/log/run_script.log
+echo msg >> /usr/src/app/log/run_script.log
