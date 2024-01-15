@@ -3,6 +3,8 @@ import session from "express-session";
 // import RedisStore from "connect-redis";
 import dotenv from "dotenv";
 import { v4 as uuidv4 } from "uuid";
+import MongoDBStore from 'connect-mongodb-session';
+import dbClient from "../utils/db";
 
 dotenv.config();
 const secret_session = process.env.SESSION_SECRET;
@@ -19,10 +21,20 @@ if (!secret_session) {
 //     ttl: 86400,
 //     prefix: "session:",
 // });
+const MongoDBStoreOptions = {
+    uri: dbClient.url,
+    collection: 'sessions',
+};
 
+const mongoDBStore = new MongoDBStore(MongoDBStoreOptions);
+
+mongoDBStore.on('error', (error) => {
+    console.error('MongoDB session store error:', error);
+});
 const sessionConfig = session({
     name: "ecom",
     // store: sessionStore,
+    store: mongoDBStore,
     secret: secret_session,
     genid: (req) => {
         return uuidv4();

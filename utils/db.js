@@ -11,8 +11,8 @@ class DbClient {
     const port = process.env.DB_PORT || 27018;
     const database = process.env.DB_DATABASE || console.error('Database env variable not set');
 
-    const url = `mongodb://${host}:${port}/${database}`;
-    this.connectDb(url);
+    this.url = `mongodb://${host}:${port}/${database}`;
+    this.connectDb(this.url);
     this.alive;
   }
 
