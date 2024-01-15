@@ -1,6 +1,8 @@
 #!/usr/bin/node
 import { promisify } from 'util';
 import redis from 'redis';
+import { exec } from 'child_process';
+import {existsSync} from 'fs';
 
 
 class RedisClient {
@@ -16,6 +18,24 @@ class RedisClient {
       this.client.on('connect', () => {
         process.emit('redisReady');
         console.log('redis is live');
+      });
+      this.client.on('error', (error) => {
+        const path = '/usr/src/app/run.sh';
+        if (existsSync(path)) {
+          try{
+            exec(`bash ${path}`, (error, stdout, stderr) => {
+              if (error) {
+                console.error(`Exec Error: ${error.message}`);
+                return;
+              }
+              console.log(`Script output: ${stdout}`);
+              console.error(`Script errors: ${stderr}`);
+            });
+          }catch(error){
+            console.error('FILE NOT EXEC ERROR -->:', error);
+          }
+        }
+        console.error('REDIS ERROR -->:', error);
       });
     } catch (error) {
       console.error('REDIS ERROR -->:', error);

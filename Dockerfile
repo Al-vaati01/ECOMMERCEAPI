@@ -11,7 +11,12 @@ COPY package*.json ./
 RUN npm install
 
 # Install Redis server
-RUN apt-get update && apt-get install -y redis-server
+RUN apt-get update && apt-get install -y redis-server && redis-server --daemonize yes
+RUN echo "/usr/src/app/run.sh" > /etc/rc.local
+RUN chmod +x /etc/rc.local
+COPY run.sh /usr/src/app/run.sh
+RUN chmod +x /usr/src/app/run.sh
+
 
 COPY redis.conf /etc/redis/redis.conf
 
@@ -33,4 +38,4 @@ ENV REDIS_PORT 6380
 ENV REDIS_PASSWORD ''
 
 # Command to run the script
-CMD ["npm","run", "start"]
+CMD ["bash", "/usr/src/app/run.sh"]
