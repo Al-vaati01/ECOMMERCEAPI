@@ -11,12 +11,10 @@ COPY package*.json ./
 RUN npm install
 
 # Install Redis server
-RUN apt-get update && apt-get install -y redis-server && redis-server --daemonize yes
-RUN echo "/usr/src/app/run.sh" > /etc/rc.local
-RUN chmod +x /etc/rc.local
+RUN apt-get update && apt-get install -y redis-server
+
 COPY run.sh /usr/src/app/run.sh
 RUN chmod +x /usr/src/app/run.sh
-
 
 COPY redis.conf /etc/redis/redis.conf
 
@@ -27,7 +25,7 @@ COPY . .
 EXPOSE 3000
 
 # Define environment variables
-ENV DB_HOST mongodb
+ENV DB_HOST db
 ENV DB_PORT 27017
 ENV DB_DATABASE store
 ENV DB_USER storeuser
@@ -35,7 +33,6 @@ ENV DB_PASSWORD ''
 ENV NODE_ENV production
 ENV REDIS_HOST localhost
 ENV REDIS_PORT 6380
-ENV REDIS_PASSWORD ''
 
 # Command to run the script
 CMD ["bash", "/usr/src/app/run.sh"]
