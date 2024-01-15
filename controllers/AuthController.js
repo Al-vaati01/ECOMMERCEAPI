@@ -6,7 +6,7 @@ import { AccessToken } from '../schema/User.js';
 import redisClient from '../utils/redis.js';
 import { Cart } from '../schema/Cart.js';
 import { Types } from 'mongoose';
-import e from 'express';
+
 
 
 class AuthController {

@@ -6,6 +6,7 @@ import router from '../routes/index.js';
 
 
 
+
 class AppController {
     constructor(app) {
         this.app = app;

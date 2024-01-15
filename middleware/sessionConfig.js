@@ -30,7 +30,7 @@ const sessionConfig = session({
     resave: false,
     saveUninitialized: true,
     cookie: {
-        secure: false,
+        secure: process.env.NODE_ENV === 'production' ? true : false,
         httpOnly: true,
         maxAge: 86400,
     },

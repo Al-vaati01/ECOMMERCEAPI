@@ -7,16 +7,16 @@ class RedisClient {
     try {
       this.client = redis.createClient(
         {
-          url: `redis://localhost:${process.env.REDIS_PORT || 6318}`,
+          url: `redis://localhost:${process.env.REDIS_PORT || 6380}`,
         }
       );
       this.connectRedis();
-
       this.client.on('connect',()=>{
+        process.emit('redisReady');
         console.log('redis is live');
       });
     } catch (error) {
-      console.error('REDIS ERROR:', error);
+      console.error('REDIS ERROR -->:', error);
     }
   }
   async connectRedis() {
