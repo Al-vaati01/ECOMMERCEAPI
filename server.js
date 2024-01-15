@@ -37,7 +37,7 @@ app.use((err, req, res, next) => {
 //(Route not found)
 app.use((req, res, next) => {
     if (res.statusCode === 404) {
-        return res.status(404).json({ error: 'Not Found' });
+        return res.status(404).json({ error: 'Not Found', redirecting: true, redirectUrl: '/' });
     }
     next();
 });
