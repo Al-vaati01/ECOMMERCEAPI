@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 import Auth from '../middleware/auth.js';
 import { v4 as uuidv4 } from 'uuid';
 import { AccessToken } from '../schema/User.js';
-import redisClient from '../utils/redis.js';
+// import redisClient from '../utils/redis.js';
 import { Cart } from '../schema/Cart.js';
 import { Types } from 'mongoose';
 
@@ -42,9 +42,12 @@ class AuthController {
                 const userId = userInDB._id.toString();
 
                 //check if token exists in redis
-                const existingToken = await redisClient.get(`auth_${userId}`);
-                if (existingToken) {
-                    return res.status(200).json({ status: 'Logged in', token: existingToken });
+                // const existingToken = await redisClient.get(`auth_${userId}`);
+                // if (existingToken) {
+                //     return res.status(200).json({ status: 'Logged in', token: existingToken });
+                // }
+                if (req.session.User.auth === true) {
+                    return res.status(200).json({ status: 'Logged in'});
                 }
 
                 const id = uuidv4().toString();
@@ -55,10 +58,10 @@ class AuthController {
                 } else {
                     newToken = Auth.generateToken({ id: id, email: userInDB.email });
                 }
-                redisClient.set(`auth_${userId}`, newToken, 86400);
+                // redisClient.set(`auth_${userId}`, newToken, 86400);
+                req.session.User['auth'] = true;
                 req.session.User = {
                     id: userId,
-                    email: userInDB.email,
                     username: userInDB.username,
                 }
                 req.session.save();
@@ -82,16 +85,19 @@ class AuthController {
             const userId = userInDB._id.toString();
 
             //check if token exists in redis
-            const existingToken = await redisClient.get(`auth_${userId}`);
-            if (existingToken) {
-                //check if id is in expired token list
-                const expiredToken = await AccessToken.findOne({ userId: userId });
-                if (expiredToken) {
-                    redisClient.del(`auth_${userId}`);
-                    req.session.destroy();
-                    return res.status(401).json({ error: 'Unauthorized' });
-                }
-                return res.status(200).json({ status: 'Logged in', token: existingToken });
+            // const existingToken = await redisClient.get(`auth_${userId}`);
+            // if (existingToken) {
+            //     //check if id is in expired token list
+            //     const expiredToken = await AccessToken.findOne({ userId: userId });
+            //     if (expiredToken) {
+            //         redisClient.del(`auth_${userId}`);
+            //         req.session.destroy();
+            //         return res.status(401).json({ error: 'Unauthorized' });
+            //     }
+            //     return res.status(200).json({ status: 'Logged in', token: existingToken });
+            // }
+            if (req.session.User.auth === true) {
+                return res.status(200).json({ status: 'Logged in'});
             }
 
             const id = uuidv4().toString();
@@ -102,22 +108,23 @@ class AuthController {
             } else {
                 newToken = Auth.generateToken({ id: id, email: userInDB.email });
             }
-            redisClient.set(`auth_${userId}`, newToken, 86400);
-            req.session.User = {
-                id: userId,
-                email: userInDB.email,
-                username: userInDB.username,
-            }
+            // redisClient.set(`auth_${userId}`, newToken, 86400);
+            req.session.User['auth'] = true;
+            req.session.User['id'] = userId;
+            req.session.User['username'] = userInDB.username;
             req.session.save();
             return res.status(200).json({ status: 'Logged in', token: newToken });
 
         } else if (req.body.id) {
             const userId = req.body.id;
 
-            //check if token exists in redis
-            const existingToken = await redisClient.get(`auth_${userId}`);
-            if (existingToken) {
-                return res.status(200).json({ status: 'Logged in', token: existingToken });
+            // //check if token exists in redis
+            // const existingToken = await redisClient.get(`auth_${userId}`);
+            // if (existingToken) {
+            //     return res.status(200).json({ status: 'Logged in', token: existingToken });
+            // }
+            if (req.session.User.auth === true) {
+                return res.status(200).json({ status: 'Logged in'});
             }
             let userInDB;
             if (req.body.role && req.body.role === 'admin') {
@@ -137,12 +144,10 @@ class AuthController {
             } else {
                 newToken = Auth.generateToken({ id: id, email: userInDB.email });
             }
-            redisClient.set(`auth_${userId}`, newToken, 86400);
-            req.session.User = {
-                id: userId,
-                email: userInDB.email,
-                username: userInDB.username,
-            }
+            // redisClient.set(`auth_${userId}`, newToken, 86400);
+            req.session.User['auth'] = true;
+            req.session.User['id'] = userId;
+            req.session.User['username'] = userInDB.username;
             req.session.save();
             return res.status(200).json({ status: 'Logged in', token: newToken });
         }
@@ -164,8 +169,11 @@ class AuthController {
         }
         const userId = user._id.toString();
         //check if token is in redis
-        const token = await redisClient.get(`auth_${userId}`);
-        if (!token) {
+        // const token = await redisClient.get(`auth_${userId}`);
+        // if (!token) {
+        //     return res.status(401).json({ error: 'Unauthorized' });
+        // }
+        if (!req.session.User.auth === true) {
             return res.status(401).json({ error: 'Unauthorized' });
         }
         return userId;
@@ -186,10 +194,10 @@ class AuthController {
         }
         const adminId = admin._id.toString();
         //check if token is in redis
-        const token = await redisClient.get(`auth_${adminId}`);
-        if (!token) {
-            return null;
-        }
+        // const token = await redisClient.get(`auth_${adminId}`);
+        // if (!token) {
+        //     return null;
+        // }
         return adminId;
     }
     static async disconnect(req, res) {
@@ -206,7 +214,7 @@ class AuthController {
                     await Cart.onExit(userId.toString());
                 }
                 AccessToken.create({ userId: userId, token: id });
-                redisClient.del(`auth_${userId}`);
+                // redisClient.del(`auth_${userId}`);
                 req.session.destroy();
                 return res.status(204).json({ status: 'Logged out' });
             }

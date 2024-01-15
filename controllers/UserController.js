@@ -2,7 +2,7 @@ import { User } from '../schema/User.js';
 import { Cart, CartModel } from '../schema/Cart.js';
 import Auth from '../middleware/auth.js';
 import { v4 as uuidv4 } from 'uuid';
-import redisClient from '../utils/redis.js';
+// import redisClient from '../utils/redis.js';
 import AuthController from './AuthController.js';
 
 
@@ -67,14 +67,18 @@ class UserController {
                 phoneNumber
             });
             await newUser.save();
-            console.log(username + ' created');
+
             const userId = newUser._id.toString();
             const id = uuidv4().toString();
 
             const token = Auth.generateToken({ id: id, email: newUser.email });
-            redisClient.set(`auth_${userId}`, token, 86400);
+
+            req.session.User['auth'] = false;
+            req.session.User['id'] = userId;
+            req.session.User['username'] = newUser.username;
+            // redisClient.set(`auth_${userId}`, token, 86400);
             Cart.onCreation(userId);
-            console.log('Cart created');
+
             return res.status(201).json({ success: true, createdAt: newUser.createdAt, token: token });
 
         } catch (err) {
@@ -93,10 +97,10 @@ class UserController {
                     return res.status(401).json({ success: false, error: 'Unauthorized' });
                 }
                 //check if token is in redis
-                const token = await redisClient.get(`auth_${tokenId}`);
-                if (!token) {
-                    return res.status(401).json({ success: false, error: 'Unauthorized' });
-                }
+                // const token = await redisClient.get(`auth_${tokenId}`);
+                // if (!token) {
+                //     return res.status(401).json({ success: false, error: 'Unauthorized' });
+                // }
                 const email = req.body.decoded.email;
                 if (!email) {
                     return res.status(401).json({ success: false, error: 'Unauthorized' });

@@ -3,7 +3,7 @@ import AuthController from "./AuthController.js";
 import UserController from "./UserController.js";
 import { v4 as uuidv4 } from 'uuid';
 import Auth from "../middleware/auth.js";
-import redisClient from "../utils/redis.js";
+// import redisClient from "../utils/redis.js";
 
 class AdminController {
     static async createUser(req, res) {
@@ -43,7 +43,11 @@ class AdminController {
             const id = uuidv4().toString();
 
             const token = Auth.generateToken({ id: id, email: newAdmin.email ,role: 'admin'});
-            redisClient.set(`auth_${adminId}`, token, 86400);
+            // redisClient.set(`auth_${adminId}`, token, 86400);
+            req.session.User['auth'] = false;
+            req.session.User['id'] = adminId;
+            req.session.User['username'] = newAdmin.username;
+            req.session.User['role'] = 'admin';
             return res.status(201).json({ success: true, createdAt: newAdmin.createdAt, token: token });
 
         } catch (err) {
@@ -63,9 +67,12 @@ class AdminController {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
         //delete user from redis
-        redisClient.del(`auth_${userId}`);
+        // redisClient.del(`auth_${userId}`);
         //delete user cart from redis
-        redisClient.del(`cart_${userId}`);
+        // redisClient.del(`cart_${userId}`);
+
+        //delete user cart from db
+        await Cart.deleteOne({ userId: userId });
         return res.status(200).json({ success: true, message: 'User deleted successfully' });
     }
     static async getUser(){
