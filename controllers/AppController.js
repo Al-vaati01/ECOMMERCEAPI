@@ -25,6 +25,16 @@ class AppController {
     }
 
     initializeRoutes() {
+        // Welcome Page
+        router.get('/', (req, res) => {
+            res.send(
+                {
+                    status: 'OK',
+                    message: 'Welcome e-com API'
+                }
+            ).status(200);
+        }
+        );
         this.app.use('/api/v1', router);
     }
 }
