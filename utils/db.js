@@ -5,36 +5,47 @@ dotenv.config();
 
 class DbClient {
   constructor() {
-    const host = process.env.DB_HOST || 'localhost';
-    const port = process.env.DB_PORT || 27017;
+    this.con = mongoose;
+
+    const host = process.env.DB_HOST || 'db';
+    const port = process.env.DB_PORT || 27018;
     const database = process.env.DB_DATABASE || console.error('Database env variable not set');
 
     const url = `mongodb://${host}:${port}/${database}`;
-    this.alive = this.connectDb(url);
+    this.connectDb(url);
+    this.alive;
   }
 
-  connectDb(url) {
+  async connectDb(url) {
     try {
-      mongoose.connect(url, {
+      await mongoose.connect(url, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
+      }).then(() => {
+        console.log('Connection to DB succeeded:');
+        this.alive = true;
+      }).catch((error) => {
+        console.error('Connection to DB failed:', error);
+        this.alive = false;
       });
-      if (mongoose.connection.readyState === 0) {
-        mongoose.connection.on('error', console.error.bind(console, 'Connection error:'));
-        return false;
-      } else {
-        console.log('Connected to MongoDB');
-        this.con = mongoose;
-        return true;
-      }
     } catch (error) {
       console.error('Error connecting to MongoDB', error);
       return false;
     }
   }
 
-  isAlive() {
-    return this.alive;
+  async isAlive() {
+    const check = setTimeout(() => {
+      try{
+        if (this.alive) {
+          return true;
+        } else {
+          return false;
+        }
+      }finally{
+        clearTimeout(check);
+      }
+    }, 1000);
   }
 }
 

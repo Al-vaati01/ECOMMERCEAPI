@@ -1,9 +1,6 @@
 # Use an official Node.js runtime as a base image
 FROM --platform=linux/amd64 node:20
 
-# image name
-LABEL Name=store Version=0.0.1
-
 # Set the working directory in the container
 WORKDIR /usr/src/app
 
@@ -12,6 +9,11 @@ COPY package*.json ./
 
 # Install app dependencies
 RUN npm install
+
+# Install Redis server
+RUN apt-get update && apt-get install -y redis-server
+
+COPY redis.conf /etc/redis/redis.conf
 
 # Copy the rest of the application code
 COPY . .
@@ -25,10 +27,10 @@ ENV DB_PORT 27017
 ENV DB_DATABASE store
 ENV DB_USER storeuser
 ENV DB_PASSWORD ''
-
-ENV REDIS_HOST redis
+ENV NODE_ENV production
+ENV REDIS_HOST localhost
 ENV REDIS_PORT 6380
 ENV REDIS_PASSWORD ''
 
-# Command to run your application
-CMD ["npm", "start"]
+# Command to run the script
+CMD ["npm","run", "start"]

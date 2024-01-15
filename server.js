@@ -4,6 +4,7 @@ import AppController from './controllers/AppController.js';
 import { once } from 'events';
 
 
+
 // Load environment variables
 dotenv.config();
 
@@ -21,12 +22,23 @@ once(process, 'redisReady')
         console.error('REDIS ERROR: ', err);
     });
 
-// Start the server
 app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).send('Server Error');
-}
-);
+    if (err) {
+        if (res.statusCode === 404) {
+            return res.status(404).json({ error: 'Not Found' });
+        } else if (res.statusCode === 500) {
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+        return res.status(500).json({ error: 'Something went wrong' });
+    }
+    next();
+});
+
+//(Route not found)
+// app.use((req, res, next) => {
+//     res.status(404).json({ error: 'Route not Found' });
+// });
+
 app.listen(port, () => {
     console.log(`Server listening on port ${port}`);
 });

@@ -1,5 +1,15 @@
 version: '3'
 services:
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    # restart: always
+    command: ["npm", "run", "start"]
+
+
   db:
     image: mongo:latest
     environment:
@@ -7,10 +17,4 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ''
     ports:
       - "27018:27017"
-    restart: always
-  redis:
-    image: redis:latest
-    command: ["redis-server"]
-    ports:
-      - "6380:6379"
     restart: always

@@ -2,16 +2,18 @@
 import { promisify } from 'util';
 import redis from 'redis';
 
+
 class RedisClient {
   constructor() {
     try {
       this.client = redis.createClient(
         {
-          url: `redis://localhost:${process.env.REDIS_PORT || 6380}`,
+          host: process.env.REDIS_HOST || 'localhost',
+          port: process.env.REDIS_PORT || 6379,
         }
       );
       this.connectRedis();
-      this.client.on('connect',()=>{
+      this.client.on('connect', () => {
         process.emit('redisReady');
         console.log('redis is live');
       });
