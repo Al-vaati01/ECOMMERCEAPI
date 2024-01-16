@@ -9,9 +9,10 @@ services:
     restart: always
     command: ["node", "server.js"]
 
-
   db:
-    image: mongo:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.db
     ports:
       - "27018:27017"
     restart: always

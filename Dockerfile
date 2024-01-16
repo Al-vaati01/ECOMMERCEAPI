@@ -25,7 +25,6 @@ COPY . .
 EXPOSE 3000
 
 # Define environment variables
-ENV DB_HOST mongo
 ENV DB_DATABASE store
 ENV DB_USER storeuser
 ENV NODE_ENV production
