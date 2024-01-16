@@ -7,7 +7,7 @@ services:
     depends_on:
       - db
     restart: always
-    command: ["npm", "run", "start"]
+    command: ["node", "server.js"]
 
 
   db:

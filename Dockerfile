@@ -35,4 +35,4 @@ ENV NODE_ENV production
 # ENV REDIS_PORT 6380
 
 # # Command to run the script
-# CMD ["bash", "/usr/src/app/run.sh"]
+CMD [ "npm","run","start" ]
