@@ -7,7 +7,7 @@ class DbClient {
   constructor() {
     this.con = mongoose;
 
-    const host = 'db' || process.env.DB_HOST || 'localhost';
+    const host = process.env.DB_HOST || 'db';
     const port = process.env.DB_PORT || 27018;
     const database = process.env.DB_DATABASE || console.error('Database env variable not set');
 

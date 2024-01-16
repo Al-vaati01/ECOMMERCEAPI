@@ -96,7 +96,7 @@ class AuthController {
             //     }
             //     return res.status(200).json({ status: 'Logged in', token: existingToken });
             // }
-            if (req.session.User.auth === true) {
+            if (req.session.User?.auth === true) {
                 return res.status(200).json({ status: 'Logged in'});
             }
 
@@ -109,9 +109,11 @@ class AuthController {
                 newToken = Auth.generateToken({ id: id, email: userInDB.email });
             }
             // redisClient.set(`auth_${userId}`, newToken, 86400);
-            req.session.User['auth'] = true;
-            req.session.User['id'] = userId;
-            req.session.User['username'] = userInDB.username;
+            req.session.User = {
+                auth: true,
+                id: userId,
+                username: userInDB.username
+            }
             req.session.save();
             return res.status(200).json({ status: 'Logged in', token: newToken });
 
@@ -216,13 +218,13 @@ class AuthController {
                 AccessToken.create({ userId: userId, token: id });
                 // redisClient.del(`auth_${userId}`);
                 req.session.destroy();
-                return res.status(204).json({ status: 'Logged out' });
+                return res.status(200).json({ status: 'Logged out' });
             }
             if (req.session.User) {
                 const userId = new Types.ObjectId(req.session.User.id);
                 await Cart.onExit(userId);
                 await req.session.destroy();
-                return res.status(204).json({ status: 'Logged out' });
+                return res.status(200).json({ status: 'Logged out' });
             }
             return res.status(401).json({ error: 'Unauthorized' });
         } catch (err) {
