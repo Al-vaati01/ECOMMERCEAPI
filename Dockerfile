@@ -25,7 +25,7 @@ COPY . .
 EXPOSE 3000
 
 # Define environment variables
-ENV DB_HOST db
+ENV DB_HOST mongo
 ENV DB_PORT 27017
 ENV DB_DATABASE store
 ENV DB_USER storeuser
