@@ -26,10 +26,8 @@ EXPOSE 3000
 
 # Define environment variables
 ENV DB_HOST mongo
-ENV DB_PORT 27017
 ENV DB_DATABASE store
 ENV DB_USER storeuser
-ENV DB_PASSWORD ''
 ENV NODE_ENV production
 # ENV REDIS_HOST localhost
 # ENV REDIS_PORT 6380
